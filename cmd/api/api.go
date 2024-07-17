@@ -23,6 +23,10 @@ func NewAPIServer(addr string, db *sql.DB) *APIServer {
 func (s *APIServer) Run() error {
     router := gin.New()
 
+    // Middlewares
+    router.Use(gin.Logger())
+    router.Use(gin.Recovery())
+
     // Trusted proxies cfg
     err := router.SetTrustedProxies(nil)
     if err != nil {

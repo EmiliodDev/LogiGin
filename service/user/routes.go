@@ -17,11 +17,3 @@ func (h *Handler) RegisterRoutes(router *gin.RouterGroup) {
     router.POST("/register", h.handleRegister)
     router.POST("/login", h.handleLogin)
 }
-
-func (h *Handler) handleLogin(c *gin.Context) {
-    
-}
-
-func (h *Handler) handleRegister(c *gin.Context) {
-
-}
