@@ -86,7 +86,6 @@ func TestHandlerRegister(t *testing.T) {
             Password:   "securepassword",
         }
 
-        // Cambiado a puntero a types.User
         existingUser := &types.User{
             FirstName:  "Emilio",
             LastName:   "Ortiz",
@@ -94,7 +93,6 @@ func TestHandlerRegister(t *testing.T) {
             Password:   "hashedpassword",
         }
 
-        // Asegurarse de que devuelve un puntero a types.User
         mockStore.On("GetUserByEmail", payload.Email).Return(existingUser, nil)
 
         body, _ := json.Marshal(payload)
