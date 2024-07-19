@@ -12,25 +12,25 @@ import (
 
 func (h *Handler) handleRegister(c *gin.Context) {
     var user types.RegisterUserPayload
-    if err := utils.ParseJSON(c.Request, &user); err != nil {
-        utils.WriteError(c.Writer, http.StatusBadRequest, err)
+    if err := utils.ParseJSON(c, &user); err != nil {
+        utils.WriteError(c, http.StatusBadRequest, err)
         return
     }
 
     if err := utils.Validate.Struct(user); err != nil {
-        utils.WriteError(c.Writer, http.StatusBadRequest, fmt.Errorf("invalid payload %v", err))
+        utils.WriteError(c, http.StatusBadRequest, fmt.Errorf("invalid payload %v", err))
         return
     }
 
     _, err := h.store.GetUserByEmail(user.Email)
     if err == nil {
-        utils.WriteError(c.Writer, http.StatusBadRequest, fmt.Errorf("user with email %s already exists", user.Email))
+        utils.WriteError(c, http.StatusBadRequest, fmt.Errorf("user with email %s already exists", user.Email))
         return
     }
 
     hashedPassword, err := auth.HashPassword(user.Password)
     if err != nil {
-        utils.WriteError(c.Writer, http.StatusInternalServerError, err)
+        utils.WriteError(c, http.StatusInternalServerError, err)
         return
     }
 
@@ -41,9 +41,9 @@ func (h *Handler) handleRegister(c *gin.Context) {
         Password: hashedPassword,
     })
     if err != nil {
-        utils.WriteError(c.Writer, http.StatusInternalServerError, err)
+        utils.WriteError(c, http.StatusInternalServerError, err)
         return
     }
 
-    utils.WriteJSON(c.Writer, http.StatusCreated, nil)
+    utils.WriteJSON(c, http.StatusCreated, nil)
 }

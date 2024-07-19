@@ -13,29 +13,29 @@ import (
 
 func (h *Handler) handleLogin(c *gin.Context) {
     var user types.LoginUserPayload
-    if err := utils.ParseJSON(c.Request, &user); err != nil {
-        utils.WriteError(c.Writer, http.StatusBadRequest, err)
+    if err := utils.ParseJSON(c, &user); err != nil {
+        utils.WriteError(c, http.StatusBadRequest, err)
         return
     }
 
     if err := utils.Validate.Struct(user); err != nil {
         errors := err.(validator.ValidationErrors)
-        utils.WriteError(c.Writer, http.StatusBadRequest, fmt.Errorf("invalid payload %v", errors))
+        utils.WriteError(c, http.StatusBadRequest, fmt.Errorf("invalid payload %v", errors))
         return
     }
 
     u, err := h.store.GetUserByEmail(user.Email)
     if err != nil {
-        utils.WriteError(c.Writer, http.StatusBadRequest, fmt.Errorf("not found invalid email or password"))
+        utils.WriteError(c, http.StatusBadRequest, fmt.Errorf("not found invalid email or password"))
         return
     }
     
     if !auth.ComparePasswords(u.Password, []byte(user.Password)) {
-        utils.WriteError(c.Writer, http.StatusBadRequest, fmt.Errorf("invalid email or password"))
+        utils.WriteError(c, http.StatusBadRequest, fmt.Errorf("invalid email or password"))
         return
     }
 
-    utils.WriteJSON(c.Writer, http.StatusOK, map[string]string{"token": ""})
+    utils.WriteJSON(c, http.StatusOK, map[string]string{"token": ""})
 }
 
 
