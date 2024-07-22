@@ -1,7 +1,6 @@
 package user
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/EmiliodDev/todoAPI/service/auth"
@@ -11,39 +10,39 @@ import (
 )
 
 func (h *Handler) handleRegister(c *gin.Context) {
-    var user types.RegisterUserPayload
-    if err := utils.ParseJSON(c, &user); err != nil {
-        utils.WriteError(c, http.StatusBadRequest, err)
+    var payload types.RegisterUserPayload
+    if err := c.ShouldBindJSON(&payload); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
         return
     }
 
-    if err := utils.Validate.Struct(user); err != nil {
-        utils.WriteError(c, http.StatusBadRequest, fmt.Errorf("invalid payload %v", err))
+    if err := utils.Validate.Struct(payload); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
         return
     }
 
-    _, err := h.store.GetUserByEmail(user.Email)
+    _, err := h.store.GetUserByEmail(payload.Email)
     if err == nil {
-        utils.WriteError(c, http.StatusBadRequest, fmt.Errorf("user with email %s already exists", user.Email))
+        c.JSON(http.StatusBadRequest, gin.H{"error": "user already exists"})
         return
     }
 
-    hashedPassword, err := auth.HashPassword(user.Password)
+    hashedPassword, err := auth.HashPassword(payload.Password)
     if err != nil {
-        utils.WriteError(c, http.StatusInternalServerError, err)
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
         return
     }
 
     err = h.store.CreateUser(types.User{
-        FirstName: user.FirstName,
-        LastName: user.LastName,
-        Email: user.Email,
-        Password: hashedPassword,
+        FirstName:  payload.FirstName,
+        LastName:   payload.LastName,
+        Email:      payload.Email,
+        Password:   hashedPassword,
     })
     if err != nil {
-        utils.WriteError(c, http.StatusInternalServerError, err)
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
         return
     }
 
-    utils.WriteJSON(c, http.StatusCreated, nil)
+    c.JSON(http.StatusCreated, gin.H{"message": "registered user"})
 }

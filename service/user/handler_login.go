@@ -12,30 +12,30 @@ import (
 )
 
 func (h *Handler) handleLogin(c *gin.Context) {
-    var user types.LoginUserPayload
-    if err := utils.ParseJSON(c, &user); err != nil {
-        utils.WriteError(c, http.StatusBadRequest, err)
+    var payload types.LoginUserPayload
+    if err := c.ShouldBindJSON(&payload); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
         return
     }
 
-    if err := utils.Validate.Struct(user); err != nil {
+    if err := utils.Validate.Struct(payload); err != nil {
         errors := err.(validator.ValidationErrors)
-        utils.WriteError(c, http.StatusBadRequest, fmt.Errorf("invalid payload %v", errors))
+        c.JSON(http.StatusBadRequest, fmt.Errorf("invalid payload %v", errors))
         return
     }
 
-    u, err := h.store.GetUserByEmail(user.Email)
+    u, err := h.store.GetUserByEmail(payload.Email)
     if err != nil {
-        utils.WriteError(c, http.StatusBadRequest, fmt.Errorf("not found invalid email or password"))
+        c.JSON(http.StatusBadRequest, gin.H{"error": "not found, invalid email or password"})
         return
     }
     
-    if !auth.ComparePasswords(u.Password, []byte(user.Password)) {
-        utils.WriteError(c, http.StatusBadRequest, fmt.Errorf("invalid email or password"))
+    if !auth.ComparePasswords(u.Password, []byte(payload.Password)) {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid email or password"})
         return
     }
 
-    utils.WriteJSON(c, http.StatusOK, map[string]string{"token": ""})
+    c.JSON(http.StatusOK, map[string]string{"token": ""})
 }
 
 

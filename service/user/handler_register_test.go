@@ -102,6 +102,8 @@ func TestHandlerRegister(t *testing.T) {
 
         router.ServeHTTP(resp, req)
 
+        t.Logf("Response Code: %d, Body: %s", resp.Code, resp.Body.String())
+
         assert.Equal(t, http.StatusBadRequest, resp.Code)
         mockStore.AssertExpectations(t)
     })

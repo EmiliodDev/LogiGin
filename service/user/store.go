@@ -25,7 +25,7 @@ func (s *Store) CreateUser(user types.User) error {
 }
 
 func (s *Store) GetUserByEmail(email string) (*types.User, error) {
-    rows, err := s.db.Query("SELECT * FROM user WHERE email = ?", email)
+    rows, err := s.db.Query("SELECT * FROM users WHERE email = ?", email)
     if err != nil {
         return nil, err
     }
@@ -46,7 +46,7 @@ func (s *Store) GetUserByEmail(email string) (*types.User, error) {
 }
 
 func (s *Store) GetUserByID(id int) (*types.User, error) {
-    rows, err := s.db.Query("SELECT * FROM user WHERE id = ?", id)
+    rows, err := s.db.Query("SELECT * FROM users WHERE id = ?", id)
     if err != nil {
         return nil, err
     }
