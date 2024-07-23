@@ -8,8 +8,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/EmiliodDev/todoAPI/service/auth"
-	"github.com/EmiliodDev/todoAPI/types"
+	"github.com/EmiliodDev/LogiGin/service/auth"
+	"github.com/EmiliodDev/LogiGin/types"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )

@@ -1,7 +1,8 @@
 package user
 
 import (
-	"github.com/EmiliodDev/todoAPI/types"
+	"github.com/EmiliodDev/LogiGin/service/auth"
+	"github.com/EmiliodDev/LogiGin/types"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,4 +17,6 @@ func NewHandler(store types.UserStore) *Handler {
 func (h *Handler) RegisterRoutes(router *gin.RouterGroup) {
     router.POST("/register", h.handleRegister)
     router.POST("/login", h.handleLogin)
+
+    router.GET("/users/{userID}", auth.WithJWTAuth(h.handleGetUser, h.store))
 }

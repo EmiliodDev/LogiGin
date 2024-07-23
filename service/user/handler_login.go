@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/EmiliodDev/todoAPI/service/auth"
-	"github.com/EmiliodDev/todoAPI/types"
-	"github.com/EmiliodDev/todoAPI/utils"
+	"github.com/EmiliodDev/LogiGin/config"
+	"github.com/EmiliodDev/LogiGin/service/auth"
+	"github.com/EmiliodDev/LogiGin/types"
+	"github.com/EmiliodDev/LogiGin/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
@@ -35,7 +36,14 @@ func (h *Handler) handleLogin(c *gin.Context) {
         return
     }
 
-    c.JSON(http.StatusOK, map[string]string{"token": ""})
+    secret := []byte(config.Envs.JWTSecret)
+    token, err := auth.CreateJWT(secret, u.ID)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, err)
+        return
+    }
+
+    c.JSON(http.StatusOK, map[string]string{"token": token})
 }
 
 

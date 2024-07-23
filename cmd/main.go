@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/EmiliodDev/todoAPI/cmd/api"
-	"github.com/EmiliodDev/todoAPI/config"
-	"github.com/EmiliodDev/todoAPI/db"
+	"github.com/EmiliodDev/LogiGin/cmd/api"
+    "github.com/EmiliodDev/LogiGin/config"
+	"github.com/EmiliodDev/LogiGin/db"
 	"github.com/go-sql-driver/mysql"
 )
 

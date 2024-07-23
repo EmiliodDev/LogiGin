@@ -3,9 +3,9 @@ package user
 import (
 	"net/http"
 
-	"github.com/EmiliodDev/todoAPI/service/auth"
-	"github.com/EmiliodDev/todoAPI/types"
-	"github.com/EmiliodDev/todoAPI/utils"
+	"github.com/EmiliodDev/LogiGin/service/auth"
+	"github.com/EmiliodDev/LogiGin/types"
+	"github.com/EmiliodDev/LogiGin/utils"
 	"github.com/gin-gonic/gin"
 )
 

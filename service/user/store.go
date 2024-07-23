@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/EmiliodDev/todoAPI/types"
+	"github.com/EmiliodDev/LogiGin/types"
 )
 
 type Store struct {

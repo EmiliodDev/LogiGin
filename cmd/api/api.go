@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/EmiliodDev/todoAPI/service/user"
+	"github.com/EmiliodDev/LogiGin/service/user"
 	"github.com/gin-gonic/gin"
 )
 
