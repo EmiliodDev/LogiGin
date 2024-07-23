@@ -3,11 +3,12 @@ package user
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
+	"github.com/EmiliodDev/todoAPI/service/auth"
 	"github.com/EmiliodDev/todoAPI/types"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -16,45 +17,93 @@ import (
 func TestHandlerLogin(t *testing.T) {
     gin.SetMode(gin.TestMode)
 
-    mocksStore := new(MockUserStore)
-    handler := NewHandler(mocksStore)
+    tests := []struct {
+        name                string
+        payload             interface{}
+        setupMocks          func(*MockUserStore)
+        expectedStatus      int
+        expectedResponse    string
+    }{
+        {
+            name:               "invalid JSON payload",
+            payload:            `{
+                                    "email": "invalid-email",
+                                    "password": "securepassword"
+                                }`,
+            setupMocks:         func(mus *MockUserStore) {},
+            expectedStatus:     http.StatusBadRequest,
+            expectedResponse:   `{"error":"invalid payload"}`,
+        },
+        {
+            name:               "validation error",
+            payload:            types.LoginUserPayload{
+                                    Email: "invalid-email",
+                                    Password: "securepassword",
+                                },
+            setupMocks:         func(mus *MockUserStore) {},
+            expectedStatus:     http.StatusBadRequest,
+            expectedResponse:   `{}`,
+        },
+        {
+            name:               "user not found",
+            payload:            types.LoginUserPayload{
+                                    Email: "user@example.com",
+                                    Password: "securepassword",
+                                },
+            setupMocks:         func(mus *MockUserStore) {
+                                    mus.On("GetUserByEmail", "user@example.com").Return(nil, errors.New("user not found"))
+                                },
+            expectedStatus:     http.StatusBadRequest,
+            expectedResponse:   `{"error":"not found, invalid email or password"}`,
+        },
+        {
+            name:               "incorrect password",
+            payload:            types.LoginUserPayload{
+                                    Email:      "user@example.com",
+                                    Password:   "wrongpassword",
+                                },
+            setupMocks:         func(mus *MockUserStore) {
+                                    hashedPassword, _ := auth.HashPassword("correctpassword") 
+                                    mus.On("GetUserByEmail", "user@example.com").Return(&types.User{Email:"user@example.com", Password: hashedPassword}, nil)
+                                },
+            expectedStatus:     http.StatusBadRequest,
+            expectedResponse:   `{"error":"invalid email or password"}`,
+        },
+        {
+            name:               "successful login",
+            payload:            types.LoginUserPayload{
+                                    Email:      "user@example.com",
+                                    Password:   "correctpassword",
+                                },
+            setupMocks:         func(mus *MockUserStore) {
+                                    hashedPassword, _ := auth.HashPassword("correctpassword") 
+                                    mus.On("GetUserByEmail", "user@example.com").Return(&types.User{Email: "user@example.com", Password: hashedPassword}, nil)
+                                },
+            expectedStatus:     http.StatusOK,
+            expectedResponse:   `{"token":""}`,
+        },
+    }
 
-    t.Run("successful login", func(t *testing.T) {
-        payload := types.LoginUserPayload{
-            Email:      "test@test.com",
-            Password:   "securepassword",
-        }
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T)  {
+            mockStore := new(MockUserStore)
 
-        existingUser := &types.User{
-            ID:         1,
-            FirstName:  "Emilio",
-            LastName:   "Ortiz",
-            Email:      "test@test.com",
-            Password:   "hashedpassword",
-            CreatedAt:  time.Time{},
-        }
+            tt.setupMocks(mockStore)
 
-        mocksStore.On("GetUserByEmail", payload.Email).Return(existingUser, nil)
+            h := NewHandler(mockStore)
 
-        body, err := json.Marshal(payload)
-        if err != nil {
-            t.Fatal(err)
-        }
 
-        req, err := http.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(body))
-        if err != nil {
-            t.Fatal(err)
-        }
+            recorder := httptest.NewRecorder()
+            context, _ := gin.CreateTestContext(recorder)
 
-        req.Header.Set("Content-Type", "application/json")
-        resp := httptest.NewRecorder()
+            payloadBytes, _ := json.Marshal(tt.payload)
+            req, _ := http.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(payloadBytes))
+            context.Request = req
 
-        router := gin.Default()
+            h.handleLogin(context)
 
-        router.POST("/login", handler.handleLogin)
-        router.ServeHTTP(resp, req)
-
-        assert.Equal(t, http.StatusCreated, resp.Code)
-        mocksStore.AssertExpectations(t)
-    })
+            assert.Equal(t, tt.expectedStatus, recorder.Code)
+            assert.JSONEq(t, tt.expectedResponse, recorder.Body.String())
+        })
+    }
 }
