@@ -1,6 +1,6 @@
 # LogiGin
 
-LogiGin is a robust(not now) and efficient API designed for user registration and login functionalities. Built entirely in Go using the Gin framework, LogiGin offers a seamless and secure way to handle user authentication and management. The API connects to a MySQL database and supports database migrations using [Migrate](https://github.com/golang-migrate/migrate/tree/v4.17.0/cmd/migrate) package.
+LogiGin is a robust (not now) and efficient API designed for user registration and login functionalities. Built entirely in Go using the Gin framework, LogiGin offers a seamless and secure way to handle user authentication and management. The API connects to a MySQL database and supports database migrations using [Migrate](https://github.com/golang-migrate/migrate/tree/v4.17.0/cmd/migrate) package.
 
 ## Key Features
 
